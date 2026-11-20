@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/leynos/murder/blob/main/docs/contracts/fixture-manifest.schema.json",
+  "title": "Murder proposed conformance fixture manifest",
+  "description": "Provenance and integrity metadata, not evidence that a compatibility gate passed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifestVersion", "profileId", "status", "provenance", "cases"],
+  "properties": {
+    "manifestVersion": { "const": 1 },
+    "profileId": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["planned", "recorded"] },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lodyDocsRevision", "upstreamLodyRevision", "packages", "licenceReview", "sanitization"],
+      "properties": {
+        "lodyDocsRevision": { "$ref": "#/$defs/revision" },
+        "upstreamLodyRevision": { "$ref": "#/$defs/revision" },
+        "packages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "version": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "generator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["revision", "runtime", "lockfileSha256"],
+          "properties": {
+            "revision": { "$ref": "#/$defs/revision" },
+            "runtime": { "type": "string", "minLength": 1 },
+            "lockfileSha256": { "$ref": "#/$defs/digest" }
+          }
+        },
+        "licenceReview": { "enum": ["pending", "recorded"] },
+        "sanitization": { "enum": ["pending", "recorded", "synthetic"] }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "origin", "operation", "input", "expected"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "origin": { "enum": ["upstream-generated", "captured", "synthetic"] },
+          "operation": {
+            "enum": ["snapshot-import", "delta-import", "merge-sequence", "key-scan", "read-only-sync", "recovery", "authoring"]
+          },
+          "input": { "$ref": "#/$defs/artefact" },
+          "expected": { "$ref": "#/$defs/artefact" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "recorded" } } },
+      "then": {
+        "properties": {
+          "cases": { "minItems": 1 },
+          "provenance": {
+            "required": ["generator"],
+            "properties": {
+              "licenceReview": { "const": "recorded" },
+              "sanitization": { "enum": ["recorded", "synthetic"] }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "artefact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Corpus-relative file path; the corpus validator must reject escape paths and verify the digest."
+        },
+        "sha256": { "$ref": "#/$defs/digest" }
+      }
+    }
+  }
+}

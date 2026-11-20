@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "profileId": "lody-flock-0.5.0-reader-candidate",
+  "status": "planned",
+  "provenance": {
+    "lodyDocsRevision": "fce1be8092f7db763598e986fc96288fe94302c8",
+    "upstreamLodyRevision": "61bd9701a5ed6899a9f42787df682acfc3fd7d4b",
+    "packages": [
+      { "name": "@loro-dev/flock-wasm", "version": "0.5.0" },
+      { "name": "loro-repo", "version": "0.25.0" },
+      { "name": "@loro-dev/streams-crdt", "version": "0.20.0" }
+    ],
+    "licenceReview": "pending",
+    "sanitization": "pending"
+  },
+  "cases": []
+}
